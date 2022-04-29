@@ -1,14 +1,17 @@
 package com.learning.mongotemplate.bootstrap;
 
 import com.learning.mongotemplate.model.Books;
+import com.mongodb.client.model.BulkWriteOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -20,6 +23,7 @@ public class BooksOps implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
         mongoTemplate.save(new Books(500, "Core Java", 200, "Kathy Sierra", 1065.5));
         mongoTemplate.save(new Books(501, "JSP & Servlets", 350, "Kathy Sierra", 1749.0));
         mongoTemplate.save(new Books(502, "Spring in Action", 480, "Craig Walls", 940.75));
@@ -30,10 +34,10 @@ public class BooksOps implements CommandLineRunner {
         mongoTemplate.save(new Books(507, "Pro Spring Boot", 850, "Felipe Gutierrez", 2167.99));
         mongoTemplate.save(new Books(508, "Beginning jQuery", 180, "Franklin", 1500.00));
         mongoTemplate.save(new Books(509, "Java Design Patterns", 114, "Devendra Singh", 919.99));
-
         System.out.println("------All records has been saved successfully-------");
 
-        mongoTemplate.insert(List.of(
+        BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Books.class);
+        List books = List.of(
                         new Books(500, "Core Java", 200, "Kathy Sierra", 1065.5),
                         new Books(501, "JSP & Servlets", 350, "Kathy Sierra", 1749.0),
                         new Books(502, "Spring in Action", 480, "Craig Walls", 940.75),
@@ -44,9 +48,8 @@ public class BooksOps implements CommandLineRunner {
                         new Books(507, "Pro Spring Boot", 850, "Felipe Gutierrez", 2167.99),
                         new Books(508, "Beginning jQuery", 180, "Franklin", 1500.00),
                         new Books(509, "Java Design Patterns", 114, "Devendra Singh", 919.99)
-                ),
-                "bookstore"
-        );
+                );
+        bulkOperations.insert(books);
 
         List<Books> list = mongoTemplate.findAll(Books.class);
         //List<Book> list = mt.findAll(Book.class,"Book");  //If collection name & the Entity Class Name are different (case-sensitive)
